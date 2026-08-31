@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16 #postgreSQL ist för mariadb
+    restart: no
+    volumes:
+      - dbstore:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: forum_db
+      POSTGRES_USER: forum_user
+      POSTGRES_PASSWORD: notSecureChangeMe
+
+  site:
+    depends_on:
+      - db
+    build: . #bygger site direkt från dockerfile i projektmappen
+    restart: no
+    volumes:
+      - ./public:/var/www/html #ändrade från /html till /public för mer familjäritet
+    ports:
+      - 8080:80
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: forum_db
+      DB_USER: forum_user
+      DB_PASSWORD: notSecureChangeMe
+
+volumes:
+  dbstore:
