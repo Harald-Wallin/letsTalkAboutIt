@@ -4,6 +4,8 @@ services:
     restart: no
     volumes:
       - dbstore:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
     environment:
       POSTGRES_DB: forum_db
       POSTGRES_USER: forum_user
