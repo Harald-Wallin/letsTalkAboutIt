@@ -10,37 +10,37 @@
     $lastName = trim($_POST['last_name'] ?? '');
     $userName = trim($_POST['user_name'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-    $repeat_password = trim($_POST['repeat_password'] ?? '');
+    $password = ($_POST['password'] ?? '');
+    $repeat_password = ($_POST['repeat_password'] ?? '');
 
 
     //Enkel, specifik error-hantering; om fält lämnas tomma
     $errors = [];
 
 if ($firstName === '') {
-    $errors[] = 'First name is required.';
+    $errors[] = 'First name is required';
 }
 
 if ($lastName === '') {
-    $errors[] = 'Last name is required.';
+    $errors[] = 'Last name is required';
 }
 
 if ($userName === '') {
-    $errors[] = 'Username is required.';
+    $errors[] = 'Username is required';
 }
 
 //PHP's inbyggda emailvalidering
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $errors[] = 'Email is not valid.';
+    $errors[] = 'Email is not valid';
 }
 
 if ($password === '') {
-    $errors[] = 'Password is required.';
+    $errors[] = 'Password is required';
 }
 
 //Om password inte är samma som det repeterade password'et
-if ($password !== $repeatPassword) {
-    $errors[] = 'Passwords do not match.';
+if ($password !== $repeat_password) {
+    $errors[] = 'Passwords do not match';
 }
 
 //Om det finns fel i error-arrayen > exit
@@ -50,7 +50,11 @@ if (!empty($errors)) {
 }
 
 //Hashar "password"
-$passwordHash = password_hash($password, PASSWORD_DEFAUL);
+$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+
+require_once dirname (__DIR__).'/src/db.php';
+
 
 //statement, och $pdo ->prepare =~ "object.method()" från JS.
 //->prepare = 
@@ -58,7 +62,7 @@ $passwordHash = password_hash($password, PASSWORD_DEFAUL);
 
 //Variabel kallad "stmt" som vi laddar med ett PDO-statement (prepare)
 $stmt = $pdo->prepare(
-    'INSERT INTE users (
+    'INSERT INTO users (
     user_name,
     first_name,
     last_name,
@@ -75,7 +79,7 @@ $stmt = $pdo->prepare(
 
 //Exekverar den laddade statementen, stoppar in användarinputen
 //FÖRHINDRAR INJECTIONS, genom att användarinputen inte direkt stoppas in 
-// i queryn- den går först genom valideringen, SEN sätts den 
+// i queryn
 $stmt -> execute([
     'user_name' => $userName,
     'first_name' => $firstName,
