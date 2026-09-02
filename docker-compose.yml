@@ -18,6 +18,7 @@ services:
     restart: no
     volumes:
       - ./public:/var/www/html #ändrade från /html till /public för mer familjäritet
+      - ./src:/var/www/src #tillgång till db.php
     ports:
       - 8080:80
     environment:
