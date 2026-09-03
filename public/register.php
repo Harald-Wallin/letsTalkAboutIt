@@ -9,12 +9,13 @@
     $firstName = trim($_POST['first_name'] ?? '');
     $lastName = trim($_POST['last_name'] ?? '');
     $userName = trim($_POST['user_name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
+    //sätter email till lowercase, förhindrar eventuellt olika capitalization-registers
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = ($_POST['password'] ?? '');
     $repeat_password = ($_POST['repeat_password'] ?? '');
 
 
-    //Enkel, specifik error-hantering; om fält lämnas tomma
+    //Enkel, specifik error-hantering;
     $errors = [];
 
 if ($firstName === '') {
@@ -43,6 +44,39 @@ if ($password !== $repeat_password) {
     $errors[] = 'Passwords do not match';
 }
 
+
+require_once dirname (__DIR__).'/src/db.php';
+
+//Om användarnamnet redan är taget..
+$userNameStmt = $pdo -> prepare(
+    'SELECT id 
+    FROM users
+    WHERE user_name = :user_name'
+);
+
+$userNameStmt -> execute([
+    'user_name' => $userName
+]);
+
+if ($userNameStmt -> fetch ()){
+    $errors[]= 'Username is already taken';
+}
+
+//om Email redan är taget...
+$emailStmt = $pdo -> prepare(
+    'SELECT id 
+    FROM users
+    WHERE email = :email'
+);
+
+$emailStmt -> execute([
+    'email' => $email
+]);
+
+if ($emailStmt -> fetch ()){
+    $errors[]= 'Email is already registered';
+};
+
 //Om det finns fel i error-arrayen > exit
 if (!empty($errors)) {
     var_dump($errors);
@@ -51,9 +85,6 @@ if (!empty($errors)) {
 
 //Hashar "password"
 $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-
-require_once dirname (__DIR__).'/src/db.php';
 
 
 //statement, och $pdo ->prepare =~ "object.method()" från JS.
