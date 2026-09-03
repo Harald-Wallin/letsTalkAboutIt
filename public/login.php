@@ -12,7 +12,7 @@
 
     $errors=[];
 
-    if(!filter_var($email, FILTER_VALIDATE EMAIL)){
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
         $errors[]= 'Email is not valid';
     };
 

@@ -1,7 +1,7 @@
 <?php
-    echo "<h1>PHP fungerar!</h1>";
-    echo "<p>Databasanslutningen fungerar!</p>";
+    session_start();
 
+    var_dump($_SESSION);
     //var_dump($_SERVER);
 ?>
 
