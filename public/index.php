@@ -8,7 +8,7 @@
 ?>
 
 <?php
-    if($isLoggedIn){
+    if($isLoggedIn && $user){
         require_once dirname(__DIR__).'/src/db.php';
         
         $stmt = $pdo -> prepare(
@@ -30,6 +30,15 @@
         ?>
             <h3> Welcome, <?php echo $user['user_name'] ?></h3>
             <p>Browse all the groups freely</p>
+
+            <?php //em FORM här istället för t.ex en länk pga att formen
+                  // gör en POST och inte en GET, och POSTs är bra för "state-
+                  // changing" som görs genom t.ex logout?>
+            <form method="POST" action="logout.php"> 
+                <button type="submit">Logout</button>
+            </form>
+
+
         <?php
     } else {
         ?>
