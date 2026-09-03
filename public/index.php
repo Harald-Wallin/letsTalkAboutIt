@@ -1,7 +1,10 @@
 <?php
     echo "<h1>PHP fungerar!</h1>";
     echo "<p>Databasanslutningen fungerar!</p>";
+
+    //var_dump($_SERVER);
 ?>
+
 
 <h2>Create account</h2>
 
@@ -29,10 +32,24 @@
 
     <label for="repeat_password">Repeat password</label>
     <input type="password" id="repeat_password" name="repeat_password" required>
-
     <br><br>
 
     <button type="submit">Register</button>
 </form>
+
+<h2>Login</h2>
+
+<form method="POST" action="login.php">
+    <label for="login_email">Email</label>
+    <input type="email" id="login_email" name="email" required>
+    <br><br>
+
+    <label for="login_password">Password</label>
+    <input type="password" id="login_password" name="password" required>
+    <br><br>
+
+    <button type="submit">Login</button>
+</form>
+
 
     
