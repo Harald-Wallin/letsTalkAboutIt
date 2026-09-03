@@ -49,6 +49,9 @@
         die('Invalid email or password');
     };
 
+    session_start();
+    $_SESSION['user_id'] = $user['id'];
 
-    echo('Login successful');
+    header('Location: /');
+    exit;
 ?>
