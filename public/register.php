@@ -9,7 +9,8 @@
     $firstName = trim($_POST['first_name'] ?? '');
     $lastName = trim($_POST['last_name'] ?? '');
     $userName = trim($_POST['user_name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
+    //sätter email till lowercase, förhindrar eventuellt olika capitalization-registers
+    $email = strtolower(trim($_POST['email'] ?? ''));
     $password = ($_POST['password'] ?? '');
     $repeat_password = ($_POST['repeat_password'] ?? '');
 
@@ -58,8 +59,8 @@ $userNameStmt -> execute([
 ]);
 
 if ($userNameStmt -> fetch ()){
-    $errors[]= 'Username is already taken'
-};
+    $errors[]= 'Username is already taken';
+}
 
 //om Email redan är taget...
 $emailStmt = $pdo -> prepare(
@@ -73,7 +74,7 @@ $emailStmt -> execute([
 ]);
 
 if ($emailStmt -> fetch ()){
-    $errors[]= 'Email is already registered'
+    $errors[]= 'Email is already registered';
 };
 
 //Om det finns fel i error-arrayen > exit

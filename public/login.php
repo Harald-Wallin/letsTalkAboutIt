@@ -3,9 +3,13 @@
         die('Invalid request');
     };
 
-    $email = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
 
+    //tog bort trim på denna då vissa faktiskt har space med flit i 
+    //lösenord
+    $password = ($_POST['password'] ?? '');
+
+    //Historik
     //var_dump ($email, $password);
     //var_dump($_SERVER);
     //var_dump($_POST);
@@ -43,6 +47,14 @@
 
     //                  Hämtas som en assoicative PHP array
     $user = $stmt -> fetch (PDO::FETCH_ASSOC);
+
+
+    //GLÖMDE DENNA CHECK FRÅN BÖRJAN. Utan denna, om man försöker logga in
+    //med en ogiltig email, blir $user i nästa funktion = false, alltså
+    //inte längre en array och vi får deprecated-error!
+    if (!$user){
+        die('Invalid email or password');
+    }
 
     //"password_verify (lösenord som just skickades, hashen som just hämtades)
     if(!password_verify($password, $user['password_hash'])){
