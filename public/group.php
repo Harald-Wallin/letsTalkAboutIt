@@ -73,15 +73,9 @@ $isMember = (bool) $membershipStmt->fetch();
     <p>You are not a member of this group</p>
 
     <form method="POST" action="applyToGroup.php">
-        <input
-            type="hidden"
-            name="group_id"
-            value="<?= (int)$group['id'] ?>"
-        >
+        <input type="hidden" name="group_id" value="<?= (int)$group['id'] ?>">
 
-        <button type="submit">
-            Apply to join
-        </button>
+        <button type="submit">Apply to join</button>
     </form>
 
 <?php endif; ?>
