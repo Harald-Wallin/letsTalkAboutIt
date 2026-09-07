@@ -125,8 +125,7 @@
 <h2> Groups </h2>
 <?php while ($group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
 
-    <h3><?= htmlspecialchars($group['group_name']) ?></h3>
-    <p><?= htmlspecialchars($group['group_description']) ?></p>
+    <?php require dirname(__DIR__) . '/src/components/groupCard.php'; ?>
 
 <?php endwhile; ?>
 
