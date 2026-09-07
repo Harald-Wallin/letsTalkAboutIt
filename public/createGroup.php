@@ -29,6 +29,11 @@
         $errors[] = ('A group description is required');
     };
 
+    if (!empty($errors)) {
+        var_dump($errors);
+        exit;
+    };
+
     require_once dirname (__DIR__).'/src/db.php';
 
     //Om gruppnamnet redan är taget-
@@ -46,54 +51,71 @@
     if ($groupNameStmt -> fetch ()){
         $errors[]= 'Group name already exists. Why not check out "'.$groupName.'"?';
 
-    }if (!empty($errors)) {
+    }
+    
+    if (!empty($errors)) {
         var_dump($errors);
         exit;
     };
 
 
-    $stmt = $pdo->prepare(
-        'INSERT INTO groups (
-        group_name,
-        group_description,
-        creator_user_id)
+    //TRANSACTION för att förhindra halvklara resultat av INSERT, t.ex om "INSERT to groups"
+    //lyckas men INSERT to groups_members misslyckas så har vi inte en halvtrasig group.
+    //Det säkerställs alltså att bägge INSERTS lyckas innan datan faktiskt sätts in i databasen.
+    try{//transaction
 
-        VALUES (
-        :group_name,
-        :group_description,
-        :creator_user_id)
+        $pdo -> beginTransaction();
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO groups (
+            group_name,
+            group_description,
+            creator_user_id)
+
+            VALUES (
+            :group_name,
+            :group_description,
+            :creator_user_id)
+            
+            RETURNING id'
+        );
+
+
+        $stmt -> execute([
+            'group_name' => $groupName,
+            'group_description' => $groupDescription,
+            'creator_user_id' => $_SESSION['user_id']
+        ]);
+
+        $group = $stmt -> fetch(PDO::FETCH_ASSOC);
+        $groupId = $group['id'];
+
+
+
+        $membershipStmt = $pdo -> prepare(
+            'INSERT INTO users_groups(
+                user_id,
+                group_id
+            )
+            VALUES(
+                :user_id,
+                :group_id
+            )'
+        );
+
+        $membershipStmt -> execute([
+            'user_id' => $_SESSION['user_id'],
+            'group_id' => $groupId
+
+        ]);
+
+        $pdo -> commit();
         
-        RETURNING id'
-    );
 
-
-    $stmt -> execute([
-        'group_name' => $groupName,
-        'group_description' => $groupDescription,
-        'creator_user_id' => $_SESSION['user_id']
-    ]);
-
-    $group = $stmt -> fetch(PDO::FETCH_ASSOC);
-    $groupId = $group['id'];
-
-
-
-    $membershipStmt = $pdo -> prepare(
-        'INSERT INTO users_groups(
-            user_id,
-            group_id
-        )
-        VALUES(
-            :user_id,
-            :group_id
-        )'
-    );
-
-    $membershipStmt -> execute([
-        'user_id' => $_SESSION[id],
-        'group_id' => $groupId
-
-    ]);
+    }catch(Throwable $e){//transaction
+        $pdo -> rollBack();
+        die('Could not create group');
+    };
 
     //echo $groupName .'sucessfully created- go start a discussion!';
     header('Location: /');
