@@ -4,11 +4,12 @@
         die ('Invalid request');
     };
 
+    session_start();
+
     if (!isset($_SESSION['user_id'])) {
         die('Log in to create a group');
     };
 
-    session_start();
 
 
     $groupName = trim($_POST['group_name'] ?? '');
@@ -41,11 +42,11 @@
         'group_name' => $groupName
     ]);
 
+    //Här kan man inserta en Locate till gruppen vars namn redan existerar, senare
     if ($groupNameStmt -> fetch ()){
-        $errors[]= 'Groupname already exists. Maybe you should check .'$groupName'. out?';
-    }
+        $errors[]= 'Group name already exists. Why not check out "'.$groupName.'"?';
 
-    if (!empty($errors)) {
+    }if (!empty($errors)) {
         var_dump($errors);
         exit;
     };
@@ -89,7 +90,7 @@
     );
 
     $membershipStmt -> execute([
-        'user_id' => $_SESSION['id'];
+        'user_id' => $_SESSION[id],
         'group_id' => $groupId
 
     ]);
