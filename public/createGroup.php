@@ -2,14 +2,19 @@
 
     if($_SERVER['REQUEST_METHOD'] !== 'POST'){
         die ('Invalid request');
-    }
+    };
+
+    if (!isset($_SESSION['user_id'])) {
+        die('Log in to create a group');
+    };
 
     session_start();
 
 
     $groupName = trim($_POST['group_name'] ?? '');
     //ingen trim här då beskrivningen får se ut hur användaren än vill att den ska se ut
-    $groupDescription = ($_POST['group_description'] ?? '');
+    //---TOG BORT REGELN OVAN DÅ "    " INTE SKA ACCEPTERAS SOM LÖSEN---
+    $groupDescription = trim($_POST['group_description'] ?? '');
 
     $errors= [];
 
@@ -37,26 +42,61 @@
     ]);
 
     if ($groupNameStmt -> fetch ()){
-        $errors[]= 'Groupname already exists. Maybe you should check '$groupName' out?';
+        $errors[]= 'Groupname already exists. Maybe you should check .'$groupName'. out?';
     }
+
+    if (!empty($errors)) {
+        var_dump($errors);
+        exit;
+    };
 
 
     $stmt = $pdo->prepare(
         'INSERT INTO groups (
         group_name,
-        group_description
+        group_description,
+        creator_user_id)
 
         VALUES (
         :group_name,
-        :group_description'
+        :group_description,
+        :creator_user_id)
+        
+        RETURNING id'
     );
 
 
     $stmt -> execute([
         'group_name' => $groupName,
-        'group_description' => $groupDescription
+        'group_description' => $groupDescription,
+        'creator_user_id' => $_SESSION['user_id']
     ]);
 
-    echo $groupName 'sucessfully created- go start a discussion!';
+    $group = $stmt -> fetch(PDO::FETCH_ASSOC);
+    $groupId = $group['id'];
+
+
+
+    $membershipStmt = $pdo -> prepare(
+        'INSERT INTO users_groups(
+            user_id,
+            group_id
+        )
+        VALUES(
+            :user_id,
+            :group_id
+        )'
+    );
+
+    $membershipStmt -> execute([
+        'user_id' => $_SESSION['id'];
+        'group_id' => $groupId
+
+    ]);
+
+    //echo $groupName .'sucessfully created- go start a discussion!';
+    header('Location: /');
+    exit;
+
 
 ?>
