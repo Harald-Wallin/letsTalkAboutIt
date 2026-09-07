@@ -57,6 +57,22 @@ $membershipStmt->execute([
 ]);
 
 $isMember = (bool) $membershipStmt->fetch();
+
+
+//Kollar om en application redan finns med user_id + group_id
+$applicationStmt = $pdo->prepare(
+    'SELECT id
+    FROM applications
+    WHERE user_id = :user_id
+    AND group_id = :group_id'
+);
+
+$applicationStmt->execute([
+    'user_id' => $_SESSION['user_id'],
+    'group_id' => $groupId
+]);
+
+$hasApplication = (bool) $applicationStmt->fetch();
 ?>
 
 <h1><?= htmlspecialchars($group['group_name']) ?></h1>
@@ -67,6 +83,10 @@ $isMember = (bool) $membershipStmt->fetch();
     <h2>Discussions</h2>
 
     <p>You are a member of this group</p>
+
+<?php elseif ($hasApplication): ?>
+
+    <p>You already have an active application towards this group</p>
 
 <?php else: ?>
 
