@@ -3,12 +3,14 @@
     $isLoggedIn = isset($_SESSION['user_id']);
     $user = null;
 
-    var_dump($_SESSION);
+    //var_dump($_SESSION);
     //var_dump($_SERVER);
 
+    require_once dirname(__DIR__).'/src/db.php';
+
     if($isLoggedIn){
-        require_once dirname(__DIR__).'/src/db.php';
         
+        //USER
         $stmt = $pdo -> prepare(
             'SELECT id,
             user_name,
@@ -25,12 +27,23 @@
 
         $user= $stmt -> fetch(PDO::FETCH_ASSOC);
     };
+
+    //GROUPS
+    $groupsStmt = $pdo->prepare(
+        'SELECT id, 
+            group_name, 
+            group_description
+        FROM groups'
+    );
+
+    //inga placeholders i queryn, så vi behöver inte lägga till "utökad" kod
+    $groupsStmt->execute();
 ?>
 
 
 <?php if ($isLoggedIn && $user): ?>
     
-    <h3> Welcome, <?php echo $user['user_name'] ?></h3>
+    <h3> Welcome, <?php echo htmlspecialchars($user['user_name']) ?></h3>
         <p>Browse all the groups freely</p>
 
         <h3>Create a new group</h3>
@@ -41,7 +54,7 @@
             <br><br>
             
             <label for="group_description">Describe your group</label>
-            <input type="textarea" id="group_description" name="group_description" required>
+            <textarea id="group_description" name="group_description" required></textarea>
 
             <button type="submit">Create group</button> 
         </form>
@@ -51,7 +64,7 @@
         <?php 
             //em FORM här istället för t.ex en länk pga att formen
             // gör en POST och inte en GET, och POSTs är bra för "state-
-            // changing" som görs genom t.ex logout
+            // changing" som görs genom t.ex en logout
         ?>
         <h3>LOGOUT</h3>
         <form method="POST" action="logout.php"> 
@@ -108,6 +121,16 @@
         <button type="submit">Register</button>
     </form>
 <?php endif; ?>
+
+
+<h2> Groups </h2>
+<?php while ($group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
+
+    <?php require dirname(__DIR__) . '/src/components/groupCard.php'; ?>
+
+<?php endwhile; ?>
+
+
  
 
 
