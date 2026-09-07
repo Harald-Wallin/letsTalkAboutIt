@@ -9,6 +9,7 @@
     if($isLoggedIn){
         require_once dirname(__DIR__).'/src/db.php';
         
+        //USER
         $stmt = $pdo -> prepare(
             'SELECT id,
             user_name,
@@ -23,6 +24,15 @@
             'id' => $_SESSION['user_id']
         ]);
 
+
+        //GROUPS
+        $groupsStmt = $pdo->prepare(
+            'SELECT id, group_name, group_description
+            FROM groups'
+        );
+
+        $groupsStmt->execute();
+
         $user= $stmt -> fetch(PDO::FETCH_ASSOC);
     };
 ?>
@@ -32,6 +42,13 @@
     
     <h3> Welcome, <?php echo $user['user_name'] ?></h3>
         <p>Browse all the groups freely</p>
+
+        <?php while ($group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
+
+            <h3><?= htmlspecialchars($group['group_name']) ?></h3>
+            <p><?= htmlspecialchars($group['group_description']) ?></p>
+
+        <?php endwhile; ?>
 
         <h3>Create a new group</h3>
         <form method="POST" action="createGroup.php">
