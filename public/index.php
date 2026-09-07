@@ -36,6 +36,7 @@
         FROM groups'
     );
 
+    //inga placeholders i queryn, så vi behöver inte lägga till "utökad" kod
     $groupsStmt->execute();
 ?>
 
@@ -63,7 +64,7 @@
         <?php 
             //em FORM här istället för t.ex en länk pga att formen
             // gör en POST och inte en GET, och POSTs är bra för "state-
-            // changing" som görs genom t.ex logout
+            // changing" som görs genom t.ex en logout
         ?>
         <h3>LOGOUT</h3>
         <form method="POST" action="logout.php"> 
