@@ -33,12 +33,27 @@
     <h3> Welcome, <?php echo $user['user_name'] ?></h3>
         <p>Browse all the groups freely</p>
 
+        <h3>Create a new group</h3>
+        <form method="POST" action="createGroup.php">
+            <label for="group_name">Group Name</label>
+            <input type="text" id="group_name" name="group_name" required>
+
+            <br><br>
+            
+            <label for="group_description">Describe your group</label>
+            <input type="textarea" id="group_description" name="group_description" required>
+
+            <button type="submit">Create group</button> 
+        </form>
+
+        <br><br>
+
         <?php 
             //em FORM här istället för t.ex en länk pga att formen
             // gör en POST och inte en GET, och POSTs är bra för "state-
             // changing" som görs genom t.ex logout
         ?>
-
+        <h3>LOGOUT</h3>
         <form method="POST" action="logout.php"> 
             <button type="submit">Logout</button>
         </form>
