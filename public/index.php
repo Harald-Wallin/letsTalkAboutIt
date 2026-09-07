@@ -3,11 +3,12 @@
     $isLoggedIn = isset($_SESSION['user_id']);
     $user = null;
 
-    var_dump($_SESSION);
+    //var_dump($_SESSION);
     //var_dump($_SERVER);
 
+    require_once dirname(__DIR__).'/src/db.php';
+
     if($isLoggedIn){
-        require_once dirname(__DIR__).'/src/db.php';
         
         //USER
         $stmt = $pdo -> prepare(
@@ -24,31 +25,25 @@
             'id' => $_SESSION['user_id']
         ]);
 
-
-        //GROUPS
-        $groupsStmt = $pdo->prepare(
-            'SELECT id, group_name, group_description
-            FROM groups'
-        );
-
-        $groupsStmt->execute();
-
         $user= $stmt -> fetch(PDO::FETCH_ASSOC);
     };
+
+    //GROUPS
+    $groupsStmt = $pdo->prepare(
+        'SELECT id, 
+            group_name, 
+            group_description
+        FROM groups'
+    );
+
+    $groupsStmt->execute();
 ?>
 
 
 <?php if ($isLoggedIn && $user): ?>
     
-    <h3> Welcome, <?php echo $user['user_name'] ?></h3>
+    <h3> Welcome, <?php echo htmlspecialchars($user['user_name']) ?></h3>
         <p>Browse all the groups freely</p>
-
-        <?php while ($group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
-
-            <h3><?= htmlspecialchars($group['group_name']) ?></h3>
-            <p><?= htmlspecialchars($group['group_description']) ?></p>
-
-        <?php endwhile; ?>
 
         <h3>Create a new group</h3>
         <form method="POST" action="createGroup.php">
@@ -58,7 +53,7 @@
             <br><br>
             
             <label for="group_description">Describe your group</label>
-            <input type="textarea" id="group_description" name="group_description" required>
+            <textarea id="group_description" name="group_description" required></textarea>
 
             <button type="submit">Create group</button> 
         </form>
@@ -125,6 +120,17 @@
         <button type="submit">Register</button>
     </form>
 <?php endif; ?>
+
+
+<h2> Groups </h2>
+<?php while ($group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
+
+    <h3><?= htmlspecialchars($group['group_name']) ?></h3>
+    <p><?= htmlspecialchars($group['group_description']) ?></p>
+
+<?php endwhile; ?>
+
+
  
 
 
