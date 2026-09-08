@@ -4,8 +4,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die('Invalid request');
 }
 
-var_dump($_POST);
-exit;
+//var_dump($_POST);
+//exit;
 
 session_start();
 
