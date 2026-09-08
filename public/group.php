@@ -123,32 +123,10 @@
     <?php else: ?>
         <?php foreach ($applications as $application): ?>
 
-            <article class ="application-card">
+            <?php require dirname (__DIR__).'/src/components/applicationCard.php'; ?>
 
-                <strong><?php echo htmlspecialchars($application['user_name']) ?></strong>
-
-                <p> <?php //UX: visar firstname + lastname för lite transparency då vi inte förhindrar att
-                          // en användare ansöker till samma grupp flera gånger, än.. ?>
-                    <?php echo htmlspecialchars($application['firstname']) ?>
-                    <?php echo htmlspecialchars($application['lastname']) ?>
-                </p>
-
-                <form method ="POST" action="approveApplication.php">
-                    <input type = "hidden" name="application_id" value="<?php (int)$application['application_id']?>">
-                    <button type="submit">Accept</button>
-                </form>
-
-                <form method ="POST" action="declineApplication.php">
-                    <input type = "hidden" name="application_id" value="<?php (int)$application['application_id']?>">
-                    <button type="submit">Decline</button>
-                </form>
-
-            </article>
         <?php endforeach; ?>
     <?php endif; ?>
-
-        
-
 
 <?php elseif ($hasApplication): ?>
 
