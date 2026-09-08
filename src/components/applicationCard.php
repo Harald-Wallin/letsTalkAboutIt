@@ -17,7 +17,7 @@
     </form>
 
     <form method ="POST" action="declineApplication.php">
-        <input type = "hidden" name="application_id" value="<?php echo (int)$application['application_id']?>">
+        <input type = "hidden" name="application_id" value="<?php echo (int)$application['application_id'] ?>">
         <button type="submit">Decline</button>
     </form>
 
