@@ -51,13 +51,15 @@ $membershipStmt = $pdo->prepare(
     AND group_id = :group_id'
 );
 
+
 $membershipStmt->execute([
     'user_id' => $_SESSION['user_id'],
     'group_id' => $application['group_id']
 ]);
 
+//alltså om membershipStmt = false..
 if(!$membershipStmt->fetch()) {
-    die('You are not allowed to approve this application.');
+    die('You are not allowed to approve this application');
 };
 
 
