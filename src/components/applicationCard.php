@@ -7,8 +7,8 @@
           // en användare ansöker till samma grupp flera gånger, än.. ?>
 
     <p>
-        <?php echo htmlspecialchars($application['firstname']) ?>
-        <?php echo htmlspecialchars($application['lastname']) ?>
+        <?php echo htmlspecialchars($application['first_name']) ?>
+        <?php echo htmlspecialchars($application['last_name']) ?>
     </p>
 
     <form method ="POST" action="approveApplication.php">
