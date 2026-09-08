@@ -4,6 +4,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die('Invalid request');
 }
 
+var_dump($_POST);
+exit;
+
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
