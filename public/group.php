@@ -59,8 +59,9 @@
     //member = true/false
     $isMember = (bool) $membershipStmt->fetch();
 
-    //Array för group-applications
+    //Arrays för applications + discussions
     $applications = [];
+    $discussions = [];
 
     //om man är member hämtas applications-datan och resultat stoppas in i $applications-arrayen
     if ($isMember) {
@@ -110,14 +111,54 @@
 <?php if ($isMember): ?>
 
     <?php //.. visas diskutioner + applications ?>
-    <h2>Discussions</h2>
+
     <p>You are a member of this group</p>
+    <h2>Discussions</h2>
+    
+    <?php if(empty ($discussions)): ?>
+
+        <h3>This group has no discussions yet. Go create one! </h3>
+
+    <?php else: ?>
+
+        <?php //FOREACH discussionCard här ?>
+
+    <?php endif; ?>
+
+    <?php //create-discussion ?>
+    <form method="POST" action="createDiscussion.php">
+        
+        <input type ="hidden" name="group_id" value="<?= (int)$group['id']?>">
+
+        <label for="discussion_name">Discussion Name</label>
+        <input type ="text" id="discussion_name" name="discussion_name" required >
+
+        <br><br>
+
+        <label for="discussion_topic">Discussion Topic</label>
+        <textarea id="discussion_topic" name="discussion_topic" required></textarea>
+
+        <br><br>
+
+        <label for="first_post">First Post</label>
+        <textarea id="first_post" name="first_post" required></textarea>
+        
+        <br><br>
+
+        <?php //Första inlägget här- bestäm formula för första: ska vara vanlig kommentar eller extra textarea? ?>
+
+        <button type="submit">Create Discussion</button>
+    </form>
+    
+        
+
+    
 
     <h2>Applications</h2>
 
     <?php //Om det inte finns applications: ?>
     <?php if (empty($applications)): ?>
-        <p>There are no appications</p>
+        <p>There are currently no applications to this group</p>
     
     <?php // Om det finns applications, körs för varje application: ?>
     <?php else: ?>
