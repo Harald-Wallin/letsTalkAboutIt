@@ -1,5 +1,8 @@
 <?php
 
+//OBS att det inte finns någon kod som förhindrar framtida re-apply's här. Hade jag haft mer tid hade
+//jag nog utökat strukturen och funktionaliteten ytterligare.
+
 if ($_SERVER['REQUEST_METHOD'] !=='POST'){
     die('Invalid request');
 };
