@@ -7,24 +7,35 @@
     session_start();
 
     if (!isset($_SESSION['user_id'])) {
-        die('Log in to create a group');
+        die('Log in to create a discussion');
     };
 
-
+    $groupId = filter_input(
+        INPUT_POST,
+        'group_id',
+        FILTER_VALIDATE_INT
+    );
 
     $discussionName = trim($_POST['discussion_name'] ?? '');
     $discussionDescription = trim($_POST['discussion_description'] ?? '');
+    $firtPost = trim($POST['first_post']?? '');
 
     $errors= [];
 
-    if($groupName === ''){
-        $errors[] = ('A group name is required');
+    if(!$groupId){
+        $errors[] = ('Invalid group');
     };
 
-    //Tänkte först lägga till en check för en VALID description också, men det känns
-    //överkurs för mig just nu
-    if($groupDescription === ''){
-        $errors[] = ('A group description is required');
+    if($discussionName === ''){
+        $errors[] = ('A discussion name is required');
+    };
+
+    if($discussionDescription === ''){
+        $errors[] = ('A discussion description is required');
+    };
+
+    if($firstPost === ''){
+        $errors[] = ('A first post is required - write something intresting!')
     };
 
     if (!empty($errors)) {
@@ -34,45 +45,62 @@
 
     require_once dirname (__DIR__).'/src/db.php';
 
-    //Om gruppnamnet redan är taget-
-    $groupNameStmt = $pdo -> prepare(
+    //kontrollera att grupp existerar
+    $groupStmt = $pdo -> prepare(
         'SELECT id 
         FROM groups
-        WHERE group_name = :group_name'
+        WHERE id = :group_id'
     );
 
-    $groupNameStmt -> execute([
-        'group_name' => $groupName
+    $groupStmt -> execute([
+        'group_id' => $groupId
     ]);
 
-    //Här kan man inserta en Locate till gruppen vars namn redan existerar, senare
-    if ($groupNameStmt -> fetch ()){
-        $errors[]= 'Group name already exists. Why not check out "'.$groupName.'"?';
+    if ($groupStmt -> fetch ()){
+        $errors[]= 'Group not found';
 
-    }
+    };
     
     if (!empty($errors)) {
         var_dump($errors);
         exit;
     };
 
+    $membershipStmt = $pdo -> prepare(
+        'SELECT id
+        FROM users_groups
+        WHERE user_id = :user_id
+        AND group_id = :group_id'
+    );
 
-    //TRANSACTION för att förhindra halvklara resultat av INSERT, t.ex om "INSERT to groups"
-    //lyckas men INSERT to groups_members misslyckas så har vi inte en halvtrasig group.
-    //Det säkerställs alltså att bägge INSERTS lyckas innan datan faktiskt sätts in i databasen.
-    try{//transaction
+    $membershipStmt = $pdo -> execute([
+        'user_id' => $_SESSION['user_id'],
+        'group_id' => $groupId
+    ]);
+
+    if(!$membershipStmt -> fetch()){
+        die('You are not allowed to create a discussion in this group');
+    };
+
+
+    //create discussion + first post
+
+
+    try{
 
         $pdo -> beginTransaction();
 
-        $stmt = $pdo->prepare(
-            'INSERT INTO groups (
-            group_name,
-            group_description,
+        $discussionStmt = $pdo->prepare(
+            'INSERT INTO discussions(
+            discussion_name,
+            discussion_topic,
+            group_id,
             creator_user_id)
 
             VALUES (
-            :group_name,
-            :group_description,
+            :discussion_name,
+            :discussion_topic,
+            :group_id,
             :creator_user_id)
             
             RETURNING id'
@@ -80,43 +108,46 @@
 
 
         $stmt -> execute([
-            'group_name' => $groupName,
-            'group_description' => $groupDescription,
+            'discussion_name' => $discussionName,
+            'discussion_topic' => $discussionTopic,
+            'group_id' => $groupId,
             'creator_user_id' => $_SESSION['user_id']
         ]);
 
-        $group = $stmt -> fetch(PDO::FETCH_ASSOC);
-        $groupId = $group['id'];
+        $discussion = $discussionStmt -> fetch(PDO::FETCH_ASSOC);
+        $discussionId = $discussion['id'];
 
-
-
-        $membershipStmt = $pdo -> prepare(
-            'INSERT INTO users_groups(
-                user_id,
-                group_id
-            )
+        $firstPostStmt = $pdo -> prepare(
+            'INSERT INTO comments(
+            creator_user_id,
+            discussion_id,
+            content)
             VALUES(
-                :user_id,
-                :group_id
+            :creator_user_id,
+            :discussion_id,
+            :content
             )'
+
         );
 
-        $membershipStmt -> execute([
-            'user_id' => $_SESSION['user_id'],
-            'group_id' => $groupId
-
-        ]);
+        $pirstPostStmt = $pdo -> execute(
+            'creator_user-id' => $_SESSION['user_id'],
+            'discussion_id' => $discussionId,
+            'content' => $firstPost
+        );
 
         $pdo -> commit();
         
 
-    }catch(Throwable $e){//transaction
-        $pdo -> rollBack();
+    }catch(Throwable $e){
+
+        if($pdo -> inTransaction()){
+            $pdo -> rollBack();
+        }
+        
         die('Could not create discussion');
     };
 
-    header('Location: /');
+    header('Location: /group.php?did='.$groupId);
     exit;
-
-
 ?>
