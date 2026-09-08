@@ -17,8 +17,8 @@
     );
 
     $discussionName = trim($_POST['discussion_name'] ?? '');
-    $discussionDescription = trim($_POST['discussion_description'] ?? '');
-    $firtPost = trim($POST['first_post']?? '');
+    $discussionTopic = trim($_POST['discussion_topic'] ?? '');
+    $firstPost = trim($_POST['first_post']?? '');
 
     $errors= [];
 
@@ -30,12 +30,12 @@
         $errors[] = ('A discussion name is required');
     };
 
-    if($discussionDescription === ''){
+    if($discussionTopic === ''){
         $errors[] = ('A discussion description is required');
     };
 
     if($firstPost === ''){
-        $errors[] = ('A first post is required - write something intresting!')
+        $errors[] = ('A first post is required - write something intresting!');
     };
 
     if (!empty($errors)) {
@@ -56,16 +56,12 @@
         'group_id' => $groupId
     ]);
 
-    if ($groupStmt -> fetch ()){
-        $errors[]= 'Group not found';
+    if (!$groupStmt -> fetch ()){
+        die('Group not found');
 
     };
-    
-    if (!empty($errors)) {
-        var_dump($errors);
-        exit;
-    };
 
+    //kontrollera membership
     $membershipStmt = $pdo -> prepare(
         'SELECT id
         FROM users_groups
@@ -73,7 +69,7 @@
         AND group_id = :group_id'
     );
 
-    $membershipStmt = $pdo -> execute([
+    $membershipStmt -> execute([
         'user_id' => $_SESSION['user_id'],
         'group_id' => $groupId
     ]);
@@ -107,7 +103,7 @@
         );
 
 
-        $stmt -> execute([
+        $discussionStmt -> execute([
             'discussion_name' => $discussionName,
             'discussion_topic' => $discussionTopic,
             'group_id' => $groupId,
@@ -130,11 +126,11 @@
 
         );
 
-        $pirstPostStmt = $pdo -> execute(
-            'creator_user-id' => $_SESSION['user_id'],
+        $firstPostStmt -> execute([
+            'creator_user_id' => $_SESSION['user_id'],
             'discussion_id' => $discussionId,
             'content' => $firstPost
-        );
+        ]);
 
         $pdo -> commit();
         
@@ -148,6 +144,6 @@
         die('Could not create discussion');
     };
 
-    header('Location: /group.php?did='.$groupId);
+    header('Location: /group.php?id='.$groupId);
     exit;
 ?>
