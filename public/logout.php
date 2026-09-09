@@ -1,14 +1,16 @@
 <?php
-    session_start();
+    require_once dirname(__DIR__) . '/src/validation.php';
 
-    if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-        die('invalid request');
-    };
+    //method = POST
+    requirePostRequest();
+
+    session_start();
 
     //Tömmer sessionens data
     $_SESSION = [];
     
     session_destroy();
+
     header('Location: /');
     exit;
 ?>

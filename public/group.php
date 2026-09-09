@@ -1,69 +1,73 @@
 <?php
 
+    require_once dirname(__DIR__) . '/src/validation.php';
+    require_once dirname(__DIR__) . '/src/auth.php';
+
     session_start();
 
-    if (!isset($_SESSION['user_id'])) {
-        die('You must be logged in to view a group.');
-    }
+    //om en användare är inloggad = dess id, annars falsy(tom)
+    $userId = requireLoggedIn();
 
-    //Input_get= data kommer från URL/query-string. FILTER... = validera att värden kan
-    //representera en int
-    $groupId = filter_input(
-        INPUT_GET,
-        'id',
-        FILTER_VALIDATE_INT
-    );
+    //Gammal
+    /*Input_get= data kommer från URL/query-string. FILTER... = validera att värden kan
+        representera en int
 
-    if (!$groupId) {
-        die('Invalid group.');
-    };
+        $groupId = filter_input(
+            INPUT_GET,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+    */
 
+    $groupId = requireValidIntInput(INPUT_GET, 'id'); 
+
+    //"skapar" pdo
     require_once dirname(__DIR__) . '/src/db.php';
 
-    $groupStmt = $pdo->prepare(
-        'SELECT id,
-            group_name,
-            group_description,
-            creator_user_id,
-            created_at
-        FROM groups
-        WHERE id = :id'
-    );
+    $group = requireExistingGroup($pdo,$groupId);
 
-    $groupStmt->execute([
-        'id' => $groupId
-    ]);
+    //Gammal
+    /*int kan vara giltig men gruppen kan fortfarande saknas
+        if (!$group){
 
-    $group = $groupStmt->fetch(PDO::FETCH_ASSOC);
+            http_response_code(404);
+            die('Group not found.');
+        };
+    */
 
-    //int kan vara giltig men gruppen kan fortfarande saknas
-    if (!$group){
 
-        http_response_code(404);
-        die('Group not found.');
-    };
+    $isMember = isGroupMember($pdo,$userId,$groupId);
 
-    //MEMBER
-    $membershipStmt = $pdo->prepare(
-        'SELECT id
-        FROM users_groups
-        WHERE user_id = :user_id
-        AND group_id = :group_id'
-    );
-
-    $membershipStmt->execute([
-        'user_id' => $_SESSION['user_id'],
-        'group_id' => $groupId
-    ]);
-
-    //member = true/false
-    $isMember = (bool) $membershipStmt->fetch();
-
-    //Array för group-applications
+    //Arrays för applications + discussions
     $applications = [];
+    $discussions = [];
 
-    //om man är member hämtas applications-datan och resultat stoppas in i $applications-arrayen
+    //om man är member hämtas diskussioner och eventuella ansökningar
     if ($isMember) {
+
+     //Discussions (queryn görs här för att en användare som inte är medlem behöver ingen av denna data alls)  
+        $discussionsStmt = $pdo -> prepare(
+            'SELECT discussions.id AS discussion_id,
+            discussions.discussion_name,
+            discussions.discussion_topic,
+            discussions.created_at,
+            users.user_name
+            FROM discussions
+            JOIN users
+            ON discussions.creator_user_id = users.id
+            WHERE discussions.group_id = :group_id
+            ORDER BY discussions.created_at DESC'
+        );
+
+        $discussionsStmt -> execute([
+            'group_id' => $groupId
+        ]);
+
+        $discussions = $discussionsStmt -> fetchAll(PDO::FETCH_ASSOC);
+
+
+
+        //Applications
         $applicationsStmt = $pdo->prepare(
             'SELECT
             applications.id AS application_id,
@@ -83,7 +87,7 @@
         ]);
 
         $applications = $applicationsStmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    };
 
 
     //Kollar om en application redan finns med user_id + group_id
@@ -95,7 +99,7 @@
     );
 
     $applicationStmt->execute([
-        'user_id' => $_SESSION['user_id'],
+        'user_id' => $userId,
         'group_id' => $groupId
     ]);
 
@@ -110,14 +114,59 @@
 <?php if ($isMember): ?>
 
     <?php //.. visas diskutioner + applications ?>
-    <h2>Discussions</h2>
+
     <p>You are a member of this group</p>
+    <h2>Discussions</h2>
+    
+    <?php if(empty ($discussions)): ?>
+
+        <h3>This group has no discussions yet. Go create one! </h3>
+
+    <?php else: ?>
+
+        <?php //För varje discussion, rendera ett discussionCard?>
+        <?php foreach ($discussions as $discussion): ?>
+
+            <?php require dirname(__DIR__) . '/src/components/discussionCard.php'; ?>
+
+        <?php endforeach; ?>
+
+    <?php endif; ?>
+
+    <?php //create-discussion ?>
+    <form method="POST" action="createDiscussion.php">
+        
+        <input type ="hidden" name="group_id" value="<?= (int)$group['id']?>">
+
+        <label for="discussion_name">Discussion Name</label>
+        <input type ="text" id="discussion_name" name="discussion_name" required >
+
+        <br><br>
+
+        <label for="discussion_topic">Discussion Topic</label>
+        <textarea id="discussion_topic" name="discussion_topic" required></textarea>
+
+        <br><br>
+
+        <label for="first_post">First Post</label>
+        <textarea id="first_post" name="first_post" required></textarea>
+        
+        <br><br>
+
+        <?php //Första inlägget här- bestäm formula för första: ska vara vanlig kommentar eller extra textarea? ?>
+
+        <button type="submit">Create Discussion</button>
+    </form>
+    
+        
+
+    
 
     <h2>Applications</h2>
 
     <?php //Om det inte finns applications: ?>
     <?php if (empty($applications)): ?>
-        <p>There are no appications</p>
+        <p>There are currently no applications to this group</p>
     
     <?php // Om det finns applications, körs för varje application: ?>
     <?php else: ?>

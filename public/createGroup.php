@@ -1,15 +1,15 @@
 <?php
 
-    if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-        die ('Invalid request');
-    };
+    require_once dirname(__DIR__) . '/src/validation.php';
+    require_once dirname(__DIR__) . '/src/auth.php';
+
+    //method = POST
+    requirePostRequest();
 
     session_start();
 
-    if (!isset($_SESSION['user_id'])) {
-        die('Log in to create a group');
-    };
-
+    //om en användare är inloggad = dess id, annars falsy(tom)
+    $userId = requireLoggedIn();
 
 
     $groupName = trim($_POST['group_name'] ?? '');
@@ -84,7 +84,7 @@
         $stmt -> execute([
             'group_name' => $groupName,
             'group_description' => $groupDescription,
-            'creator_user_id' => $_SESSION['user_id']
+            'creator_user_id' => $userId
         ]);
 
         $group = $stmt -> fetch(PDO::FETCH_ASSOC);
