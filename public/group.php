@@ -63,8 +63,32 @@
     $applications = [];
     $discussions = [];
 
-    //om man är member hämtas applications-datan och resultat stoppas in i $applications-arrayen
+    //om man är member hämtas diskussioner och eventuella ansökningar
     if ($isMember) {
+
+     //Discussions (queryn görs här för att en användare som inte är medlem behöver ingen av denna data alls)  
+        $discussionsStmt = $pdo -> prepare(
+            'SELECT discussions.id AS discussion_id,
+            discussions.discussion_name,
+            discussions.discussion_topic,
+            discussions.created_at,
+            users.user_name
+            FROM discussions
+            JOIN users
+            ON discussions.creator_user_id = users.id
+            WHERE discussions.group_id = :group_id
+            ORDER BY discussions.created_at DESC'
+        );
+
+        $discussionsStmt -> execute([
+            'group_id' => $groupId
+        ]);
+
+        $discussions = $discussionsStmt -> fetchAll(PDO::FETCH_ASSOC);
+
+
+
+        //Applications
         $applicationsStmt = $pdo->prepare(
             'SELECT
             applications.id AS application_id,
@@ -84,7 +108,7 @@
         ]);
 
         $applications = $applicationsStmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    };
 
 
     //Kollar om en application redan finns med user_id + group_id
@@ -129,29 +153,6 @@
         <?php endforeach; ?>
 
     <?php endif; ?>
-
-    <?php
-    $discussionsStmt = $pdo -> prepare(
-        'SELECT discussions.id AS discussion_id,
-        discussions.discussion_name,
-        discussions.discussion_topic,
-        discussions.created_at,
-        users.user_name
-        FROM discussions
-        JOIN users
-        ON discussions.creator_user_id = users.id
-        WHERE discussions.group_id = :group_id
-        ORDER BY discussions.created_at DESC'
-        
-
-    );
-
-    $discussionsStmt -> execute([
-        'group_id' => $groupId
-    ]);
-
-    $discussions = $discussionsStmt -> fetchAll(PDO::FETCH_ASSOC);
-    ?>
 
     <?php //create-discussion ?>
     <form method="POST" action="createDiscussion.php">
