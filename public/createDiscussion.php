@@ -1,16 +1,13 @@
 <?php
 
-    if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-        die ('Invalid request');
-    };
+    require_once dirname(__DIR__) . '/src/validation.php';
+    require_once dirname(__DIR__) . '/src/auth.php';
 
     session_start();
 
-    if (!isset($_SESSION['user_id'])) {
-        die('Log in to create a discussion');
-    };
+    $userId = requireLoggedIn();
 
-    $groupId = filter_input(
+    $groupId = requireValidIntInput(
         INPUT_POST,
         'group_id',
         FILTER_VALIDATE_INT
@@ -22,17 +19,13 @@
 
     $errors= [];
 
-    if(!$groupId){
-        $errors[] = ('Invalid group');
-    };
-
     if($discussionName === ''){
         $errors[] = ('A discussion name is required');
     };
 
-    if($discussionTopic === ''){
-        $errors[] = ('A discussion description is required');
-    };
+    if ($discussionTopic === '') {
+        $errors[] = 'A discussion description is required';
+    }
 
     if($firstPost === ''){
         $errors[] = ('A first post is required - write something intresting!');
@@ -52,36 +45,17 @@
         WHERE id = :group_id'
     );
 
-    $groupStmt -> execute([
-        'group_id' => $groupId
-    ]);
+    requireExistingGroup($pdo, $groupId);
 
-    if (!$groupStmt -> fetch ()){
-        die('Group not found');
-
-    };
-
-    //kontrollera membership
-    $membershipStmt = $pdo -> prepare(
-        'SELECT id
-        FROM users_groups
-        WHERE user_id = :user_id
-        AND group_id = :group_id'
+    requireGroupMember(
+        $pdo,
+        $userId,
+        $groupId,
+        'You are not allowed to create a discussion in this group'
     );
-
-    $membershipStmt -> execute([
-        'user_id' => $_SESSION['user_id'],
-        'group_id' => $groupId
-    ]);
-
-    if(!$membershipStmt -> fetch()){
-        die('You are not allowed to create a discussion in this group');
-    };
 
 
     //create discussion + first post
-
-
     try{
 
         $pdo -> beginTransaction();
@@ -107,7 +81,7 @@
             'discussion_name' => $discussionName,
             'discussion_topic' => $discussionTopic,
             'group_id' => $groupId,
-            'creator_user_id' => $_SESSION['user_id']
+            'creator_user_id' => $userId
         ]);
 
         $discussion = $discussionStmt -> fetch(PDO::FETCH_ASSOC);
