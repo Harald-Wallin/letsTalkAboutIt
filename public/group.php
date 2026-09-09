@@ -121,9 +121,37 @@
 
     <?php else: ?>
 
-        <?php //FOREACH discussionCard här ?>
+        <?php //För varje discussion, rendera ett discussionCard?>
+        <?php foreach ($discussions as $discussion): ?>
+
+            <?php require dirname(__DIR__) . '/src/components/discussionCard.php'; ?>
+
+        <?php endforeach; ?>
 
     <?php endif; ?>
+
+    <?php
+    $discussionsStmt = $pdo -> prepare(
+        'SELECT discussions.id AS discussion_id,
+        discussions.discussion_name,
+        discussions.discussion_topic,
+        discussions.created_at,
+        users.user_name
+        FROM discussions
+        JOIN users
+        ON discussions.creator_user_id = users.id
+        WHERE discussions.group_id = :group_id
+        ORDER BY discussions.created_at DESC'
+        
+
+    );
+
+    $discussionsStmt -> execute([
+        'group_id' => $groupId
+    ]);
+
+    $discussions = $discussionsStmt -> fetchAll(PDO::FETCH_ASSOC);
+    ?>
 
     <?php //create-discussion ?>
     <form method="POST" action="createDiscussion.php">
