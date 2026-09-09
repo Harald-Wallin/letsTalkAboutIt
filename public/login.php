@@ -1,7 +1,9 @@
 <?php 
-    if ($_SERVER['REQUEST_METHOD'] !=='POST'){
-        die('Invalid request');
-    };
+
+    require_once dirname(__DIR__) . '/src/validation.php';
+
+    //method = POST
+    requirePostRequest();
 
     $email = strtolower(trim($_POST['email'] ?? ''));
 
@@ -9,7 +11,7 @@
     //lösenord
     $password = ($_POST['password'] ?? '');
 
-    //Historik
+    //Gammalt
     //var_dump ($email, $password);
     //var_dump($_SERVER);
     //var_dump($_POST);

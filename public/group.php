@@ -1,63 +1,42 @@
 <?php
 
+    require_once dirname(__DIR__) . '/src/validation.php';
+    require_once dirname(__DIR__) . '/src/auth.php';
+
     session_start();
 
-    if (!isset($_SESSION['user_id'])) {
-        die('You must be logged in to view a group.');
-    }
+    //om en användare är inloggad = dess id, annars falsy(tom)
+    $userId = requireLoggedIn();
 
-    //Input_get= data kommer från URL/query-string. FILTER... = validera att värden kan
-    //representera en int
-    $groupId = filter_input(
-        INPUT_GET,
-        'id',
-        FILTER_VALIDATE_INT
-    );
+    //Gammal
+    /*Input_get= data kommer från URL/query-string. FILTER... = validera att värden kan
+        representera en int
 
-    if (!$groupId) {
-        die('Invalid group.');
-    };
+        $groupId = filter_input(
+            INPUT_GET,
+            'id',
+            FILTER_VALIDATE_INT
+        );
+    */
 
+    $groupId = requireValidIntInput(INPUT_GET, 'id'); 
+
+    //"skapar" pdo
     require_once dirname(__DIR__) . '/src/db.php';
 
-    $groupStmt = $pdo->prepare(
-        'SELECT id,
-            group_name,
-            group_description,
-            creator_user_id,
-            created_at
-        FROM groups
-        WHERE id = :id'
-    );
+    $group = requireExistingGroup($pdo,$groupId);
 
-    $groupStmt->execute([
-        'id' => $groupId
-    ]);
+    //Gammal
+    /*int kan vara giltig men gruppen kan fortfarande saknas
+        if (!$group){
 
-    $group = $groupStmt->fetch(PDO::FETCH_ASSOC);
+            http_response_code(404);
+            die('Group not found.');
+        };
+    */
 
-    //int kan vara giltig men gruppen kan fortfarande saknas
-    if (!$group){
 
-        http_response_code(404);
-        die('Group not found.');
-    };
-
-    //MEMBER
-    $membershipStmt = $pdo->prepare(
-        'SELECT id
-        FROM users_groups
-        WHERE user_id = :user_id
-        AND group_id = :group_id'
-    );
-
-    $membershipStmt->execute([
-        'user_id' => $_SESSION['user_id'],
-        'group_id' => $groupId
-    ]);
-
-    //member = true/false
-    $isMember = (bool) $membershipStmt->fetch();
+    $isMember = isGroupMember($pdo,$userId,$groupId);
 
     //Arrays för applications + discussions
     $applications = [];
@@ -120,7 +99,7 @@
     );
 
     $applicationStmt->execute([
-        'user_id' => $_SESSION['user_id'],
+        'user_id' => $userId,
         'group_id' => $groupId
     ]);
 

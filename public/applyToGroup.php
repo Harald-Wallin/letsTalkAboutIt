@@ -1,67 +1,33 @@
 <?php
 
-//request-check 
-if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-    die('Invalid request');
-};
+require_once dirname(__DIR__) . '/src/validation.php';
+require_once dirname(__DIR__) . '/src/auth.php';
+
+//method = POST
+requirePostRequest();
 
 session_start();
 
-//inlogg-check
-if (!isset($_SESSION['user_id'])){
-    die('Log in to apply to a group');
-};
+//om en användare är inloggad = dess id, annars falsy(tom)
+$userId = requireLoggedIn();
 
-//INT-check
-$groupId = filter_input(
-    INPUT_POST,
-    'group_id',
-    FILTER_VALIDATE_INT
-);
+//validerar en groupId 
+$groupId = requireValidIntInput(INPUT_POST,'group_id');
 
-//om felaktigt gruppID
-if (!$groupId) {
-    die('Invalid group.');
-};
 
 require_once dirname(__DIR__) . '/src/db.php';
 
+//validerar en group faktiskt finns (Hämtar egentligen all gruppdata, se kommentar i Auth.php)
+requireExistingGroup($pdo, $groupId);
 
-//om grupp existerar
-$groupStmt = $pdo->prepare(
-    'SELECT id
-     FROM groups
-     WHERE id = :group_id'
-);
 
-$groupStmt->execute([
-    'group_id' => $groupId
-]);
-
-if (!$groupStmt->fetch()) {
-    die('Group not found.');
+//kollar om redan medlem
+if (isGroupMember($pdo, $userId, $groupId)){
+    die('You are already a member of this group');
 };
 
 
-//kolla om redan medlem
-$membershipStmt = $pdo->prepare(
-    'SELECT id
-    FROM users_groups
-    WHERE user_id = :user_id
-    AND group_id = :group_id'
-);
-
-$membershipStmt->execute([
-    'user_id' => $_SESSION['user_id'],
-    'group_id' => $groupId
-]);
-
-if ($membershipStmt->fetch()) {
-    die('You are already a member of this group.');
-}
-
-
-//kolla om ansökan REDAN EXISTERAR
+//kollar om ansökan REDAN EXISTERAR
 $applicationStmt = $pdo->prepare(
     'SELECT id
     FROM applications
@@ -70,7 +36,7 @@ $applicationStmt = $pdo->prepare(
 );
 
 $applicationStmt->execute([
-    'user_id' => $_SESSION['user_id'],
+    'user_id' => $userId,
     'group_id' => $groupId
 ]);
 
@@ -92,7 +58,7 @@ $insertStmt = $pdo->prepare(
 );
 
 $insertStmt->execute([
-    'user_id' => $_SESSION['user_id'],
+    'user_id' => $userId,
     'group_id' => $groupId
 ]);
 

@@ -1,9 +1,9 @@
 <?php
 
-    //Filen ska endast ta emot POST-
-    if($_SERVER['REQUEST_METHOD'] !== 'POST'){
-        die ('Invalid request');
-    }
+    require_once dirname(__DIR__) .'/src/validation.php';
+
+    //method = POST
+    requirePostRequest();
 
     //"??" = "om inte finns så.."
     $firstName = trim($_POST['first_name'] ?? '');

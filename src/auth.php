@@ -14,6 +14,8 @@ function requireLoggedIn(): int{
 
 
 //Check att grupp existerar
+//OBS- hämtar alla columns för att group.php använder variabeln för att hämta all grupp-data.
+//Lite onödigt kanske men i denna version får det duga
 function requireExistingGroup(PDO $pdo, int $groupId): array
 {
     $stmt = $pdo->prepare(
@@ -67,7 +69,7 @@ function requireGroupMember(PDO $pdo, int $userId, int $groupId): void{
 };
 
 
-//Hämtar en application och spottar antingen ut den eller ger felmeddelande
+//Hämtar en application och spottar antingen ut den eller
 function requireApplication(PDO $pdo, int $applicationId): array{
     $stmt = $pdo->prepare(
         'SELECT

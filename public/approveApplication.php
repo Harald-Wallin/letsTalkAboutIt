@@ -1,69 +1,30 @@
 <?php
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    die('Invalid request');
-}
+require_once dirname(__DIR__) . '/src/validation.php';
+require_once dirname(__DIR__) . '/src/auth.php';
+
+//Method = POST
+requirePostRequest();
 
 //var_dump($_POST);
 //exit;
 
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    die('You must be logged in');
-}
+//om en användare är inloggad = dess id, annars falsy(tom)
+$userId = requireLoggedIn();
 
-$applicationId = filter_input(
-    INPUT_POST,
-    'application_id',
-    FILTER_VALIDATE_INT
-);
+$applicationId = requireValidIntInput(INPUT_POST,'application_id');
 
-if (!$applicationId) {
-    die('Invalid application.');
-}
 
 require_once dirname(__DIR__) . '/src/db.php';
 
 
-// hämtar ansökan
-$applicationStmt = $pdo->prepare(
-    'SELECT id,
-    user_id,
-    group_id
-    FROM applications
-    WHERE id = :application_id'
-);
-
-$applicationStmt->execute([
-    'application_id' => $applicationId
-]);
-
-$application = $applicationStmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$application) {
-    die('Application not found');
-};
+// checkar och hämtar ansökan
+$application = requireApplication($pdo, $applicationId);
 
 
-// kontrollera medlemskap även här
-$membershipStmt = $pdo->prepare(
-    'SELECT id
-    FROM users_groups
-    WHERE user_id = :user_id
-    AND group_id = :group_id'
-);
-
-
-$membershipStmt->execute([
-    'user_id' => $_SESSION['user_id'],
-    'group_id' => $application['group_id']
-]);
-
-//alltså om membershipStmt = false..
-if(!$membershipStmt->fetch()) {
-    die('You are not allowed to approve this application');
-};
+requireGroupMember($pdo, $userId, (int)$application['group_id']);
 
 
 //tansaction vid godkännande då det är TVÅ saker som modifieras i databasen: ny rad i users_groups

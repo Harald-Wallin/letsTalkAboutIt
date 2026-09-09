@@ -3,65 +3,24 @@
 //OBS att det inte finns någon kod som förhindrar framtida re-apply's här. Hade jag haft mer tid hade
 //jag nog utökat strukturen och funktionaliteten ytterligare.
 
-if ($_SERVER['REQUEST_METHOD'] !=='POST'){
-    die('Invalid request');
-};
+require_once dirname(__DIR__) . '/src/validation.php';
+require_once dirname(__DIR__) . '/src/auth.php';
+
+//method = POST
+requirePostRequest();
 
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-    die('You must be logged in');
-};
+//om en användare är inloggad = dess id, annars falsy(tom)
+$userId = requireLoggedIn();
 
-$applicationId = filter_input(
-    INPUT_POST,
-    'application_id',
-    FILTER_VALIDATE_INT
-);
-
-if (!$applicationId) {
-    die('Invalid application');
-};
+$applicationId = requireValidIntInput(INPUT_POST,'application_id');
 
 require_once dirname(__DIR__) .'/src/db.php';
 
+$application= requireApplication($pdo, $applicationId);
 
-//hämtar ansökan..
-$applicationStmt = $pdo->prepare(
-    'SELECT id,
-    user_id,
-    group_id
-    FROM applications
-    WHERE id = :application_id'
-);
-
-$applicationStmt->execute([
-    'application_id' => $applicationId
-]);
-
-$application = $applicationStmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$application) {
-    die('Application not found');
-}
-
-
-//kontrollerar medlemskap
-$membershipStmt = $pdo->prepare(
-    'SELECT id
-    FROM users_groups
-    WHERE user_id = :user_id
-    AND group_id = :group_id'
-);
-
-$membershipStmt->execute([
-    'user_id' => $_SESSION['user_id'],
-    'group_id' => $application['group_id']
-]);
-
-if (!$membershipStmt->fetch()) {
-    die('You are not allowed to decline this application');
-}
+requireGroupMember($pdo, $userId, (int)$application['group_id']);
 
 
 //tar bort ansökan

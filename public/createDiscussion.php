@@ -3,15 +3,16 @@
     require_once dirname(__DIR__) . '/src/validation.php';
     require_once dirname(__DIR__) . '/src/auth.php';
 
+    //method = POST
+    requirePostRequest();
+
     session_start();
 
+    //om en användare är inloggad = dess id, annars falsy(tom)
     $userId = requireLoggedIn();
 
-    $groupId = requireValidIntInput(
-        INPUT_POST,
-        'group_id',
-        FILTER_VALIDATE_INT
-    );
+    //validerar en groupId 
+    $groupId = requireValidIntInput(INPUT_POST,'group_id');
 
     $discussionName = trim($_POST['discussion_name'] ?? '');
     $discussionTopic = trim($_POST['discussion_topic'] ?? '');
@@ -38,21 +39,11 @@
 
     require_once dirname (__DIR__).'/src/db.php';
 
-    //kontrollera att grupp existerar
-    $groupStmt = $pdo -> prepare(
-        'SELECT id 
-        FROM groups
-        WHERE id = :group_id'
-    );
-
+    //validerar en group faktiskt finns (Hämtar egentligen all gruppdata, se kommentar i Auth.php)
     requireExistingGroup($pdo, $groupId);
 
-    requireGroupMember(
-        $pdo,
-        $userId,
-        $groupId,
-        'You are not allowed to create a discussion in this group'
-    );
+
+    requireGroupMember($pdo,$userId,$groupId);
 
 
     //create discussion + first post
@@ -101,7 +92,7 @@
         );
 
         $firstPostStmt -> execute([
-            'creator_user_id' => $_SESSION['user_id'],
+            'creator_user_id' => $userId,
             'discussion_id' => $discussionId,
             'content' => $firstPost
         ]);
