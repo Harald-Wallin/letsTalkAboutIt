@@ -2,6 +2,7 @@
     <div class="site-header-inner">
         <a class="site-logo" href="/">
             <img src="/images/logo.png" alt="Logo">
+            <h2>Let's Talk About It</h2>
         </a>
         
         <nav class ="site-nav">
