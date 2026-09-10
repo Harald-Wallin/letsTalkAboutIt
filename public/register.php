@@ -1,9 +1,12 @@
 <?php
 
     require_once dirname(__DIR__) .'/src/validation.php';
+    require_once dirname(__DIR__) . '/src/flash.php';
 
     //method = POST
     requirePostRequest();
+
+    session_start();
 
     //"??" = "om inte finns så.."
     $firstName = trim($_POST['first_name'] ?? '');
@@ -79,8 +82,10 @@ if ($emailStmt -> fetch ()){
 
 //Om det finns fel i error-arrayen > exit
 if (!empty($errors)) {
-    var_dump($errors);
-    exit;
+    redirectWithErrors(
+        $errors,
+        '/#registerModal'
+    );
 }
 
 //Hashar "password"
@@ -119,4 +124,9 @@ $stmt -> execute([
     'password_hash' => $passwordHash
 ]);
 
-echo 'User created';
+//echo 'User created';
+
+$_SESSION['flash_success'] = 'Account created! Login and join the debate';
+
+header('Location: /#loginModal');
+exit;

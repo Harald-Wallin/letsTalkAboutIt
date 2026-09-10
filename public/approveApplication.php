@@ -68,7 +68,12 @@ try{
         $pdo->rollBack();
     }
 
-    die('Could not approve application');
+    //die('Could not approve application');
+
+    redirectWithErrors(
+        ['Could not approve application'],
+        '/group.php?id='.(int)$application['group_id']. '#errorModal'
+    );
 };
 
 //Redirect till applications group_id, alltså till tillhörande gruppsida

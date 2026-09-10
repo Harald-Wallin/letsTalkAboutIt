@@ -22,9 +22,12 @@ requireExistingGroup($pdo, $groupId);
 
 
 //kollar om redan medlem
-if (isGroupMember($pdo, $userId, $groupId)){
-    die('You are already a member of this group');
-};
+if (isGroupMember($pdo, $userId, $groupId)) {
+    redirectWithErrors(
+        ['You are already a member of this group'],
+        '/group.php?id=' . $groupId . '#errorModal'
+    );
+}
 
 
 //kollar om ansökan REDAN EXISTERAR
@@ -41,7 +44,10 @@ $applicationStmt->execute([
 ]);
 
 if ($applicationStmt->fetch()) {
-    die('You have already applied to this group');
+    redirectWithErrors(
+        ['You have already applied to this group'],
+        '/group.php?id=' . $groupId . '#errorModal'
+    );
 }
 
 

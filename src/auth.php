@@ -3,11 +3,17 @@
 
 
 //login-checkarna
-function requireLoggedIn(): int{
-
+function requireLoggedIn(): int
+{
     if (!isset($_SESSION['user_id'])) {
-        die('You must be logged in');
-    }
+
+        $_SESSION['flash_errors'] = [
+            'You must be logged in to view this page'
+        ];
+
+        header('Location: /#loginModal');
+        exit;
+    };
 
     return (int) $_SESSION['user_id'];
 };

@@ -2,6 +2,7 @@
 
 require_once dirname(__DIR__) . '/src/validation.php';
 require_once dirname(__DIR__) . '/src/auth.php';
+require_once dirname(__DIR__) . '/src/flash.php';
 
 //Request = POST
 requirePostRequest();
@@ -17,8 +18,11 @@ $discussionId = requireValidIntInput(INPUT_POST, 'discussion_id');
 //Hämtar och trimmar kommentaren
 $content = trim($_POST['content'] ?? '');
 
-if ($content === ''){
-    die('A comment is required');
+if ($content === '') {
+    redirectWithErrors(
+        ['A comment is required'],
+        '/discussion.php?id=' .$discussionId .'#errorModal'
+    );
 };
 
 require_once dirname(__DIR__) .'/src/db.php';

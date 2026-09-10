@@ -5,6 +5,10 @@
 
     session_start();
 
+    //error flash import
+    require_once dirname(__DIR__) . '/src/flash.php';
+    $flashErrors = getFlashErrors();
+
     //om en användare är inloggad = dess id, annars falsy(tom)
     $userId = requireLoggedIn();
 
@@ -126,6 +130,9 @@
 
 <body>
     <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
+    
+    <?php //error flash?>
+    <?php require dirname(__DIR__) . '/src/components/errorModal.php'; ?>
 
     <main>
 

@@ -5,6 +5,10 @@ require_once dirname(__DIR__) . '/src/auth.php';
 
 session_start();
 
+    //error flash import
+    require_once dirname(__DIR__) . '/src/flash.php';
+    $flashErrors = getFlashErrors();
+
 //kontrollerar att användaren är inloggad och hämtar dess id
 $userId = requireLoggedIn();
 
@@ -90,6 +94,9 @@ $comments = $commentsStmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
     <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
+
+    <?php //error flash?>
+    <?php require dirname(__DIR__) . '/src/components/errorModal.php'; ?>
 
     <main>
         <section class="discussion-header">

@@ -1,5 +1,11 @@
 <?php
     session_start();
+
+    //error flash import
+    require_once dirname(__DIR__) . '/src/flash.php';
+    $flashErrors = getFlashErrors();
+
+
     $isLoggedIn = isset($_SESSION['user_id']);
     $user = null;
 
@@ -58,6 +64,8 @@
 
     <?php //HEADER ?>
     <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
+    <?php //error flash?>
+    <?php require dirname(__DIR__) . '/src/components/errorModal.php'; ?>
 
     <main>
         <div class="index-layout">
@@ -131,6 +139,19 @@
 
                     <h2>Login</h2>
 
+                    <?php //hanterar ERRORS?>
+                    <?php if (!empty($flashErrors)): ?>
+
+                    <div class="form-errors">
+
+                        <?php foreach ($flashErrors as $error): ?>
+
+                            <p><?= htmlspecialchars($error) ?></p>
+                        <?php endforeach; ?>
+                    </div>
+
+                <?php endif; ?>
+
                         
                     <form method="POST" action="login.php">
 
@@ -152,6 +173,21 @@
                         <a href="#" class="auth-modal-close">X</a>
 
                         <h2>Create Account</h2>
+
+                        <?php //hanterar ERRORS?>
+                        <?php if (!empty($flashErrors)): ?>
+
+                            <div class="form-errors">
+
+                                <?php foreach ($flashErrors as $error): ?>
+
+                                    <p><?= htmlspecialchars($error) ?></p>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        <?php endif; ?>
 
                         <form method="POST" action="register.php">
 

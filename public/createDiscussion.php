@@ -33,9 +33,11 @@
     };
 
     if (!empty($errors)) {
-        var_dump($errors);
-        exit;
-    };
+    redirectWithErrors(
+        $errors,
+        '/group.php?id=' .$groupId. '#errorModal'
+    );
+}
 
     require_once dirname (__DIR__).'/src/db.php';
 
@@ -106,7 +108,12 @@
             $pdo -> rollBack();
         }
         
-        die('Could not create discussion');
+        //die('Could not create discussion');
+
+        redirectWithErrors(
+            ['Could not create discussion'],
+            '/group.php?id=' . $groupId . '#errorModal'
+        );
     };
 
     header('Location: /group.php?id='.$groupId);

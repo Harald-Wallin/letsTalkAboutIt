@@ -2,6 +2,7 @@
 
     require_once dirname(__DIR__) . '/src/validation.php';
     require_once dirname(__DIR__) . '/src/auth.php';
+    require_once dirname(__DIR__) . '/src/flash.php';
 
     //method = POST
     requirePostRequest();
@@ -30,9 +31,11 @@
     };
 
     if (!empty($errors)) {
-        var_dump($errors);
-        exit;
-    };
+    redirectWithErrors(
+        $errors,
+        '/#errorModal'
+    );
+}
 
     require_once dirname (__DIR__).'/src/db.php';
 
@@ -54,9 +57,11 @@
     }
     
     if (!empty($errors)) {
-        var_dump($errors);
-        exit;
-    };
+    redirectWithErrors(
+        $errors,
+        '/#errorModal'
+    );
+}
 
 
     //TRANSACTION för att förhindra halvklara resultat av INSERT, t.ex om "INSERT to groups"
@@ -104,7 +109,7 @@
         );
 
         $membershipStmt -> execute([
-            'user_id' => $_SESSION['user_id'],
+            'user_id' => $userId,
             'group_id' => $groupId
 
         ]);
@@ -112,9 +117,16 @@
         $pdo -> commit();
         
 
-    }catch(Throwable $e){//transaction
-        $pdo -> rollBack();
-        die('Could not create group');
+    } catch (Throwable $e){
+
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        };
+
+        redirectWithErrors(
+            ['Could not create group'],
+            '/#errorModal'
+        );
     };
 
     //echo $groupName .'sucessfully created- go start a discussion!';

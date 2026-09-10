@@ -1,9 +1,12 @@
 <?php 
 
     require_once dirname(__DIR__) . '/src/validation.php';
+    require_once dirname(__DIR__) . '/src/flash.php';
 
     //method = POST
     requirePostRequest();
+
+    session_start();
 
     $email = strtolower(trim($_POST['email'] ?? ''));
 
@@ -26,9 +29,11 @@
         $errors[]= 'Password Required';
     };
 
+    // redirectar nu istället för att exit'a
     if(!empty ($errors)){
-        var_dump($errors);
-        exit;
+        redirectWithErrors(
+            $errors, '/#loginModal'
+        );
     };
 
     require_once dirname(__DIR__).'/src/db.php';
@@ -50,20 +55,26 @@
     //                  Hämtas som en assoicative PHP array
     $user = $stmt -> fetch (PDO::FETCH_ASSOC);
 
-
+    //GAMMAL KOMMENTAR
     //GLÖMDE DENNA CHECK FRÅN BÖRJAN. Utan denna, om man försöker logga in
     //med en ogiltig email, blir $user i nästa funktion = false, alltså
     //inte längre en array och vi får deprecated-error!
-    if (!$user){
-        die('Invalid email or password');
-    }
+
+    //Omgjord med nya error-systemet
+    if (!$user) {
+    redirectWithErrors(
+        ['Invalid email or password'],
+        '/#loginModal'
+    );
+}
 
     //"password_verify (lösenord som just skickades, hashen som just hämtades)
-    if(!password_verify($password, $user['password_hash'])){
-        die('Invalid email or password');
-    };
-
-    session_start();
+    if (!password_verify($password, $user['password_hash'])) {
+        redirectWithErrors(
+            ['Invalid email or password'],
+            '/#loginModal'
+        );
+    }
 
     //skydd mot session fixation
     session_regenerate_id(true);

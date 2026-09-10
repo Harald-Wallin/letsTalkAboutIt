@@ -2,6 +2,10 @@
 
     session_start();
 
+    //errorflashing- jag vill undvika att ett error dirigerar till en helt ny sida
+    require_once dirname(__DIR__) . '/src/flash.php';
+    $flashErrors = getFlashErrors();
+
     $isLoggedIn = isset($_SESSION['user_id']);
 
     require_once dirname(__DIR__) . '/src/db.php';
@@ -35,7 +39,11 @@
 
 <body>
 
+    <?php //HEADER?>
     <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
+
+    <?php //error flash?>
+    <?php require dirname(__DIR__) . '/src/components/errorModal.php'; ?>
 
     <main>
         <section class="browse-header">
