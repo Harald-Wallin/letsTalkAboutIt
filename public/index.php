@@ -41,95 +41,143 @@
 ?>
 
 
-<?php if ($isLoggedIn && $user): ?>
-    
-    <h3> Welcome, <?php echo htmlspecialchars($user['user_name']) ?></h3>
-        <p>Browse all the groups freely</p>
 
-        <h3>Create a new group</h3>
-        <form method="POST" action="createGroup.php">
-            <label for="group_name">Group Name</label>
-            <input type="text" id="group_name" name="group_name" required>
+<!DOCTYPE html>
+<html lang="en">
 
-            <br><br>
-            
-            <label for="group_description">Describe your group</label>
-            <textarea id="group_description" name="group_description" required></textarea>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-            <button type="submit">Create group</button> 
-        </form>
+    <title>Let's Talk About It</title>
 
-        <br><br>
+    <link rel="stylesheet" href="/style.css">
+</head>
 
-        <?php 
-            //em FORM här istället för t.ex en länk pga att formen
-            // gör en POST och inte en GET, och POSTs är bra för "state-
-            // changing" som görs genom t.ex en logout
-        ?>
-        <h3>LOGOUT</h3>
-        <form method="POST" action="logout.php"> 
-            <button type="submit">Logout</button>
-        </form>
+<body>
 
-<?php else: ?>
-        
-    <h2>Login...</h2>
+    <?php //HEADER ?>
+    <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
 
-    <form method="POST" action="login.php">
-        <label for="login_email">Email</label>
-        <input type="email" id="login_email" name="email" required>
-        <br><br>
+    <main>
+        <div class="index-layout">
+            <section class="forum-sidebar">
+                <div class="sidebar-heading">
 
-        <label for="login_password">Password</label>
-        <input type="password" id="login_password" name="password" required>
-        <br><br>
+                    <h2>Forum Groups</h2>
+                    <a href="/groups.php">Browse all</a>
+                </div>
 
-        <button type="submit">Login</button>
-    </form>
+                <div class="group-list">
 
-    <br><br>
+                    <?php $shownGroups = 0; ?>
 
+                    <?php while ($shownGroups < 4 && $group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
 
-    <h2>.. or create a user!</h2>
+                        <?php 
+                            require dirname(__DIR__) . '/src/components/groupCard.php';
+                            $shownGroups++;
+                        ?>
+                    <?php endwhile; ?>
 
-    <form method="POST" action="register.php">
+                </div>
 
-        <label for="first_name">First name</label>
-        <input type="text" id="first_name" name="first_name" required>
-        <br><br>
+            </section>
 
-        <label for="last_name">Last name</label>
-        <input type="text" id="last_name" name="last_name" required>
-        <br><br>
+            <section class="index-hero">
 
-        <label for="user_name">Username</label>
-        <input type="text" id="user_name" name="user_name" required>
-        <br><br>
+                <?php if ($isLoggedIn && $user): ?>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
-        <br><br>
+                    <div class="welcome-panel">
+                    
+                        <h3> Welcome, <?php echo htmlspecialchars($user['user_name']) ?></h3>
+                        <p>What discussion will you join today?</p>
 
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-        <br><br>
+                        <h3>Create a new group</h3>
+                        <form method="POST" action="createGroup.php">
+                            <label for="group_name">Group Name</label>
+                            <input type="text" id="group_name" name="group_name" required>
+                                
+                            <label for="group_description">Describe your group</label>
+                            <textarea id="group_description" name="group_description" required></textarea>
 
-        <label for="repeat_password">Repeat password</label>
-        <input type="password" id="repeat_password" name="repeat_password" required>
-        <br><br>
+                            <button type="submit">Create group</button> 
+                        </form>
+                    </div>
 
-        <button type="submit">Register</button>
-    </form>
-<?php endif; ?>
+                <?php else: ?>
+                            
+                    <div class="auth-intro">
+                        <h1>Find your people</h1>
+                        <p>Browse communitites, join discussions and start your own forum!</p>
 
+                        <div class="auth-intro-actions">
+                            <?php //"#loginModal": element med id="loginModal" => CSS :target, och visas?>
+                            <a class="auth-button" href="#loginModal">Login</a>
+                            <a class="auth-button secondary-button" href="#registerModal">Sign up</a>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </section>
+        </div>
+        <?php if (!$isLoggedIn): ?> 
 
-<h2> Groups </h2>
-<?php while ($group = $groupsStmt->fetch(PDO::FETCH_ASSOC)): ?>
+            <div class="auth-modal" id="loginModal">   
+                
+                <div class="auth-modal-content">
+                    
+                    <?php //href="#" tar bort #loginModal som target >  modalen döljs?>
+                    <a href="#" class="auth-modal-close">X</a>
 
-    <?php require dirname(__DIR__) . '/src/components/groupCard.php'; ?>
+                    <h2>Login</h2>
 
-<?php endwhile; ?>
+                        
+                    <form method="POST" action="login.php">
 
+                        <input type="email" id="login_email" name="email" placeholder="Email" required>
+
+                        <input type="password" id="login_password" name="password" placeholder="Password" required>
+
+                        <button type="submit">Login</button>
+                    </form>
+
+                    <p class="auth-switch-text">Not a member yet?<a href="#registerModal">Sign up</a></p>
+                </div>
+            </div>
+
+            <div class="auth-modal" id="registerModal">
+
+                <div class="auth-modal-content">
+
+                        <a href="#" class="auth-modal-close">X</a>
+
+                        <h2>Create Account</h2>
+
+                        <form method="POST" action="register.php">
+
+                            <input type="text" id="first_name" name="first_name" placeholder="First Name" required>
+
+                            <input type="text" id="last_name" name="last_name" placeholder="Last Name"required>
+
+                            <input type="text" id="user_name" name="user_name" placeholder="Username (will be shown in your posts)" required>
+
+                            <input type="email" id="register_email" name="email" placeholder="Email@email.com" required>
+
+                            <input type="password" id="register_password" name="password" placeholder="Password" required>
+
+                            <input type="password" id="repeat_password" name="repeat_password" placeholder="Repeat Password" required>
+
+                            <button type="submit">Register</button>
+                        </form>
+
+                        <p class="auth-switch-text">Already a member?<a href="#loginModal">Login</a></p>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    </main>
+</body>
+</html>
 
  
 

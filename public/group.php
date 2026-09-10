@@ -8,6 +8,9 @@
     //om en användare är inloggad = dess id, annars falsy(tom)
     $userId = requireLoggedIn();
 
+    //group.php kräver redan inloggning, header vet då att användare = inloggad
+    $isLoggedIn = true;
+
     //Gammal
     /*Input_get= data kommer från URL/query-string. FILTER... = validera att värden kan
         representera en int
@@ -106,89 +109,124 @@
     $hasApplication = (bool) $applicationStmt->fetch();
 ?>
 
-<?php //Huvud-sidorendering ?>
-<h1><?= htmlspecialchars($group['group_name']) ?></h1>
-<h3><?= htmlspecialchars($group['group_description']) ?></h3>
 
-<?php //Om användaren är medlem.. ?>
-<?php if ($isMember): ?>
 
-    <?php //.. visas diskutioner + applications ?>
 
-    <p>You are a member of this group</p>
-    <h2>Discussions</h2>
-    
-    <?php if(empty ($discussions)): ?>
+<!DOCTYPE html>
+<html lang="en">
 
-        <h3>This group has no discussions yet. Go create one! </h3>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <?php else: ?>
+    <title><?= htmlspecialchars($group['group_name']) ?> - Let's Talk About It</title>
 
-        <?php //För varje discussion, rendera ett discussionCard?>
-        <?php foreach ($discussions as $discussion): ?>
+    <link rel="stylesheet" href="/style.css">
+</head>
 
-            <?php require dirname(__DIR__) . '/src/components/discussionCard.php'; ?>
+<body>
+    <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
 
-        <?php endforeach; ?>
+    <main>
 
-    <?php endif; ?>
+        <section class="group-header">
+            <h1><?= htmlspecialchars($group['group_name']) ?></h1>
+            <p class="group-description"><?= htmlspecialchars($group['group_description'])?></p>
+        </section>
 
-    <?php //create-discussion ?>
-    <form method="POST" action="createDiscussion.php">
+        <?php //Om användaren är medlem.. ?>
+        <?php if ($isMember): ?>
+
+            <?php //.. visas diskutioner + applications ?>
+            <section class="group-section">
+                <div class="section-heading">
+                    <h2>Discussions</h2>
+                    <p>Join an existing conversation or start a new one!</p>
+                </div>
+            
+                <?php if(empty ($discussions)): ?>
+
+                    <h3 class="empty-message">This group has no discussions yet. Go create one!</h3>
+
+                <?php else: ?>
+
+                    <div class="discussion-list">
+
+                        <?php //För varje discussion, rendera ett discussionCard?>
+                        <?php foreach ($discussions as $discussion): ?>
+
+                            <?php require dirname(__DIR__) . '/src/components/discussionCard.php'; ?>
+
+                        <?php endforeach; ?>
+                    </div>
+
+                <?php endif; ?>
+
+                <?php //create-discussion ?>
+                <div class="create-discussion">
+
+                    <h2> Start a discussion!</h2>
+
+                    <form method="POST" action="createDiscussion.php">
+                        
+                        <input type ="hidden" name="group_id" value="<?= (int)$group['id']?>">
+
+                        <input type ="text" id="discussion_name" name="discussion_name" placeholder="Discussion name" required >
+
+                        <textarea id="discussion_topic" name="discussion_topic" placeholder="Discussion topic" required></textarea>
+
+                        <?php //Första inlägget här- bestäm formula för första: ska vara vanlig kommentar eller extra textarea? ?>
+                        <textarea id="first_post" name="first_post" placeholder="First post: What's on your mind?"required></textarea>
+
+                        <button type="submit">Create Discussion</button>
+                    </form>
+                </div>
+            </section>
         
-        <input type ="hidden" name="group_id" value="<?= (int)$group['id']?>">
+            <section class="group-section">
 
-        <label for="discussion_name">Discussion Name</label>
-        <input type ="text" id="discussion_name" name="discussion_name" required >
+                <h3>Applications</h3>
 
-        <br><br>
+                <?php //Om det inte finns applications: ?>
+                <?php if (empty($applications)): ?>
 
-        <label for="discussion_topic">Discussion Topic</label>
-        <textarea id="discussion_topic" name="discussion_topic" required></textarea>
+                    <p class="empty-message">There are currently no applications to this group</p>
+                
+                <?php // Om det finns applications, körs för varje application: ?>
+                <?php else: ?>
+                    <div class="application-list">
+                        <?php foreach ($applications as $application): ?>
 
-        <br><br>
+                            <?php require dirname (__DIR__).'/src/components/applicationCard.php'; ?>
 
-        <label for="first_post">First Post</label>
-        <textarea id="first_post" name="first_post" required></textarea>
-        
-        <br><br>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
 
-        <?php //Första inlägget här- bestäm formula för första: ska vara vanlig kommentar eller extra textarea? ?>
+            <?php elseif ($hasApplication): ?>
 
-        <button type="submit">Create Discussion</button>
-    </form>
-    
-        
+                <div class="membership-panel">
 
-    
+                    <h2>Application Pending</h2>
+                    <p>You already have an active application towards this group</p>
+                </div>
 
-    <h2>Applications</h2>
+            <?php else: ?>
 
-    <?php //Om det inte finns applications: ?>
-    <?php if (empty($applications)): ?>
-        <p>There are currently no applications to this group</p>
-    
-    <?php // Om det finns applications, körs för varje application: ?>
-    <?php else: ?>
-        <?php foreach ($applications as $application): ?>
+                <div class="membership-panel">
 
-            <?php require dirname (__DIR__).'/src/components/applicationCard.php'; ?>
+                    <h2>Join this group!</h2>
+                    <p>You are currently not a member of this group</p>
 
-        <?php endforeach; ?>
-    <?php endif; ?>
+                    <form method="POST" action="applyToGroup.php">
+                        <input type="hidden" name="group_id" value="<?= (int)$group['id'] ?>">
 
-<?php elseif ($hasApplication): ?>
+                        <button type="submit">Apply to join</button>
+                    </form>
+                </div>
 
-    <p>You already have an active application towards this group</p>
-
-<?php else: ?>
-
-    <p>You are not a member of this group</p>
-
-    <form method="POST" action="applyToGroup.php">
-        <input type="hidden" name="group_id" value="<?= (int)$group['id'] ?>">
-
-        <button type="submit">Apply to join</button>
-    </form>
-
-<?php endif; ?>
+            <?php endif; ?>
+        </main>
+    </body>
+    </html>

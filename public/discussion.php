@@ -8,6 +8,8 @@ session_start();
 //kontrollerar att användaren är inloggad och hämtar dess id
 $userId = requireLoggedIn();
 
+$isLoggedIn= true;
+
 //validerar en discussion-id
 $discussionId = requireValidIntInput(INPUT_GET, 'id');
 
@@ -72,49 +74,81 @@ $comments = $commentsStmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
-<h1><?= htmlspecialchars($discussion['discussion_name']) ?></h1>
 
-<p><?= htmlspecialchars($discussion['discussion_topic']) ?></p>
+<!DOCTYPE html>
+<html lang="en">
 
-<p>Started by <?= htmlspecialchars($discussion['user_name']) ?></p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<br>
-<br>
-<hr>
-<br>
+    <title><?= htmlspecialchars($discussion['discussion_name']) ?> - Let's Talk About It</title>
 
-<h2>Posts</h2>
+    <link rel="stylesheet" href="/style.css">
+</head>
 
-<?php if (empty($comments)): ?>
+<body>
 
-    <p>No posts found</p>
+    <?php require dirname(__DIR__) . '/src/components/header.php'; ?>
 
-<?php else: ?>
+    <main>
+        <section class="discussion-header">
 
-    <?php //För varje comment renderar vi posten ?>
-    <?php foreach ($comments as $comment): ?>
+            <h1><?= htmlspecialchars($discussion['discussion_name']) ?></h1>
 
-        <article class="comment">
+            <p class="discussion-topic"><?= htmlspecialchars($discussion['discussion_topic']) ?></p>
 
-            <strong>
-                <?= htmlspecialchars($comment['user_name']) ?>
-            </strong>
+            <p class="discussion-author">Started by <?= htmlspecialchars($discussion['user_name']) ?></p>
+        </section>
 
-            <p>
-                <?= htmlspecialchars($comment['content']) ?>
-            </p>
+        <section class="discussion-posts">
 
-            <?php //Formaterar tiden i år, månad, dag, timme, minut ?>
-            <small>
-                <?= date('Y-m-d H:i', strtotime($comment['created_at'])) ?>
-            </small>
+            <h2>Posts</h2>
 
-        </article>
+            <?php if (empty($comments)): ?>
 
-        <hr>
-        <br>
-        <hr>
+                <h3 class="empty-message">No posts found</h3>
 
-    <?php endforeach; ?>
+            <?php else: ?>
 
-<?php endif; ?>
+                <?php //För varje comment renderar vi posten ?>
+                <?php foreach ($comments as $comment): ?>
+
+                    <article class="comment">
+
+                        <strong>
+                            <?= htmlspecialchars($comment['user_name']) ?>
+                        </strong>
+
+                        <p>
+                            <?= htmlspecialchars($comment['content']) ?>
+                        </p>
+
+                        <?php //Formaterar tiden i år, månad, dag, timme, minut ?>
+                        <small>
+                            <?= date('Y-m-d H:i', strtotime($comment['created_at'])) ?>
+                        </small>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            <?php endif; ?>
+        </section>
+
+        <section class="reply-section">
+
+            <h3>Reply</h3>
+
+            <form method="POST" action="createComment.php">
+
+                <input type="hidden" name="discussion_id" value="<?= (int)$discussion['discussion_id'] ?>">
+
+                <textarea id="content" name="content" placeholder="Write your reply.." required></textarea>
+
+                <button type="submit">Post reply</button>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

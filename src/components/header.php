@@ -1,7 +1,7 @@
 <header class="site-header">
     <div class="site-header-inner">
         <a class="site-logo" href="/">
-            <img src="../media/header.png">
+            <img src="/images/logo.png" alt="Logo">
         </a>
         
         <nav class ="site-nav">
@@ -14,8 +14,8 @@
                 <form method="POST" action="/logout.php">
                     <button type="submit">Logout</button>
                 </form>
-            <?php else: // ?>
-                <a class="header-login-button" href="/?auth=login">Login</a>
+            <?php else: //"?query string" ?>
+                <a class="header-login-button" href="#loginModal">Login</a>
             <?php endif; ?>
         </div>
     </div>
