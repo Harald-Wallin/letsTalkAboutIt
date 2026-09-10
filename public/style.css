@@ -1,0 +1,353 @@
+/*OBS! AI-GENERERAD CSS!*/
+/*OBS! AI-GENERERAD CSS!*/
+/*OBS! AI-GENERERAD CSS!*/
+
+/* ---------- Base ---------- */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111827;
+    color: #e5e7eb;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 1.6;
+}
+
+main {
+    width: min(900px, 92%);
+    margin: 0 auto;
+    padding: 40px 0 80px;
+}
+
+h1,
+h2,
+h3 {
+    color: #f9fafb;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin-top: 40px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #374151;
+}
+
+p {
+    color: #cbd5e1;
+}
+
+small {
+    color: #94a3b8;
+}
+
+a {
+    color: #60a5fa;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+/* ---------- Header ---------- */
+
+.site-header {
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
+
+.site-header-inner {
+    width: min(900px, 92%);
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.site-title {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.site-title a {
+    color: #f9fafb;
+    text-decoration: none;
+}
+
+.site-subtitle {
+    margin: 3px 0 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+
+/* ---------- Forms ---------- */
+
+form {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 22px;
+    margin: 20px 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #e5e7eb;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid #4b5563;
+    border-radius: 6px;
+    background: #111827;
+    color: #f9fafb;
+    font: inherit;
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+    outline: 2px solid #3b82f6;
+    border-color: transparent;
+}
+
+button {
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 18px;
+    background: #2563eb;
+    color: white;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+
+/* ---------- Cards ---------- */
+
+.group-card,
+.discussion-card,
+.application-card,
+.comment {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 15px 0;
+}
+
+.group-card h3,
+.discussion-card h3 {
+    margin-top: 0;
+}
+
+.group-card p,
+.discussion-card p {
+    margin-bottom: 12px;
+}
+
+
+/* ---------- Comments ---------- */
+
+.comment {
+    border-left: 4px solid #3b82f6;
+}
+
+.comment strong {
+    color: #93c5fd;
+}
+
+.comment p {
+    color: #e5e7eb;
+    white-space: pre-wrap;
+}
+
+
+/* ---------- Applications ---------- */
+
+.application-card {
+    border-left: 4px solid #f59e0b;
+}
+
+.application-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.application-actions form {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+}
+
+
+/* ---------- Utility ---------- */
+
+.status-message {
+    padding: 12px 16px;
+    border-radius: 6px;
+    background: #1e3a5f;
+    border: 1px solid #2563eb;
+}
+
+.page-description {
+    color: #94a3b8;
+    margin-top: -5px;
+    margin-bottom: 30px;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #374151;
+    margin: 25px 0;
+}
+
+/* ---------- Card details ---------- */
+
+.group-card,
+.discussion-card,
+.application-card {
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.group-card:hover,
+.discussion-card:hover {
+    transform: translateY(-2px);
+    border-color: #4b5563;
+}
+
+.card-link {
+    display: inline-block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.discussion-card small {
+    display: block;
+}
+
+
+/* ---------- Application actions ---------- */
+
+.application-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.application-actions form {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+.application-actions input[type="hidden"] {
+    display: none;
+}
+
+.danger-button {
+    background: #b91c1c;
+}
+
+.danger-button:hover {
+    background: #991b1b;
+}
+
+
+/* ---------- Better form spacing ---------- */
+
+form label:not(:first-child) {
+    margin-top: 18px;
+}
+
+form input,
+form textarea {
+    margin-bottom: 4px;
+}
+
+
+/* ---------- Empty/status text ---------- */
+
+.status-message {
+    background: #172554;
+    border: 1px solid #1d4ed8;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #bfdbfe;
+}
+
+
+/* ---------- Discussion comments ---------- */
+
+.comment {
+    margin: 16px 0;
+}
+
+.comment strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.comment small {
+    display: block;
+    margin-top: 12px;
+}
+
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 600px) {
+    .application-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .application-actions button {
+        width: 100%;
+    }
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 600px) {
+    main {
+        width: 94%;
+        padding-top: 25px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    form {
+        padding: 16px;
+    }
+
+    .application-actions {
+        flex-direction: column;
+    }
+}
